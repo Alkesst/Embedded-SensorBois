@@ -16,8 +16,13 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.hardware.SensorManager;
+import android.widget.TextView;
+
 
 public class MainActivity extends AppCompatActivity {
+    private TextView xaxis;
+    private TextView yaxis;
+    private TextView zaxis;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -26,9 +31,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            System.out.println(event.values[0]);
-            System.out.println(event.values[1]);
-            System.out.println(event.values[2]);
+            xaxis.setText(String.format("%s", event.values[0]));
+            yaxis.setText(String.format("%s", event.values[1]));
+            zaxis.setText(String.format("%s", event.values[2]));
         }
 
         @Override
@@ -60,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             System.out.println("There's no fucking weebs allowed");
         }
+        xaxis = findViewById(R.id.xaxis);
+        zaxis = findViewById(R.id.yaxis);
+        yaxis = findViewById(R.id.zaxis);
     }
 
     @Override
