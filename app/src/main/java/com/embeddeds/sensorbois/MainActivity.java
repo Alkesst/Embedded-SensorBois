@@ -16,18 +16,28 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.hardware.SensorManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
     private TextView xaxis;
     private TextView yaxis;
     private TextView zaxis;
+    private Spinner spinner;
 
     private SensorManager sensorManager;
-    private Sensor accelerometer;
+    private List<Sensor> sensors;
+    private Sensor selectedSensor;
 
-    private class AccelerometerListener implements SensorEventListener {
+    private SensorListener currentListener;
+
+    private class SensorListener implements SensorEventListener {
 
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -59,16 +69,37 @@ public class MainActivity extends AppCompatActivity {
         });
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if(sensorManager != null) {
-            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener(
-                    new AccelerometerListener(), accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+            sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
         } else {
             System.out.println("There's no fucking weebs allowed");
         }
         xaxis = findViewById(R.id.xaxis);
         zaxis = findViewById(R.id.yaxis);
         yaxis = findViewById(R.id.zaxis);
+        spinner = findViewById(R.id.spinner);
+        List<String> temp = new ArrayList<>();
+        for(Sensor sens : sensors) {
+            temp.add(sens.getName());
+        }
+        ArrayAdapter<String> adaptedSensors = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, temp);
+        adaptedSensors.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adaptedSensors);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (currentListener != null) sensorManager.unregisterListener(currentListener);
+                currentListener = new SensorListener();
+                sensorManager.registerListener(
+                        currentListener, sensors.get(position), SensorManager.SENSOR_DELAY_FASTEST);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -92,7 +123,9 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void computeAccelerometer() {
+    /*private void setSensor() {
 
-    }
+        sensorManager.registerListener(
+                new SensorListener(), accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+    }*/
 }
